@@ -37,6 +37,8 @@ class TaskTemplate:
     """Good luck text to show right before first trial"""
     end = "Le mini-jeu est à présent terminé. Merci, et au revoir !"
     """Text to show when all trials are done, and before the end."""
+    csv_headers = []
+    """Headers of CSV file. Should be overwritten as it is empty in this template."""
 
     def __init__(self, csv_folder, launch_example=None):
         """
@@ -52,14 +54,19 @@ class TaskTemplate:
             color=self.bg,
             colorSpace='rgb'
         )
-        self.start = None
         exp_info = {'participant': '', "date": data.getDateStr()}
         gui.DlgFromDict(exp_info, title='Subliminal Priming Task', fixed=["date"])
         self.participant = exp_info["participant"]
         file_name = exp_info['participant'] + '_' + exp_info['date']
         self.dataFile = open(f"{csv_folder}/{file_name}.csv", 'w')
+        self.dataFile.write(", ".join(self.csv_headers))
+        self.dataFile.write("\n")
         if launch_example is not None:
             self.launch_example = launch_example
+
+    def update_csv(self, *args):
+        self.dataFile.write(", ".join(args))
+        self.dataFile.write("\n")
 
     def create_visual_text(self, text, pos=(0, 0), font_size=0.06):
         """
@@ -87,10 +94,10 @@ class TaskTemplate:
         while self.get_response() != self.yes_key_code:
             pass
 
-    @staticmethod
-    def quit_experiment():
+    def quit_experiment(self):
         """Ends the experiment
         """
+        self.dataFile.close()
         exit()
 
     def get_response(self, keys=None, timeout=float("inf")):
@@ -160,4 +167,5 @@ class TaskTemplate:
         self.create_visual_text(self.end).draw()
         self.win.flip()
         core.wait(2)
+        self.dataFile.close()
         self.quit_experiment()
