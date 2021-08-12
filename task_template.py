@@ -1,4 +1,4 @@
-from psychopy import visual, gui, data, event
+from psychopy import visual, gui, data, event, core
 
 
 class TaskTemplate:
@@ -10,7 +10,7 @@ class TaskTemplate:
     text_color = "white"
     """Set text color from create_visual_text method. Default value is white."""
     yes_key_code = "o"
-    """Set code for "yes" key. Default value is "o".("""
+    """Set code for "yes" key. Default value is "o"."""
     yes_key_name = "bleue"
     """Set name for "yes" key. Default value is "bleue" (blue in french)."""
     no_key_code = "n"
@@ -18,9 +18,14 @@ class TaskTemplate:
     no_key_name = "verte"
     """Set name for "no" key. Default value is "verte" (green in french)."""
     keys = [yes_key_code, no_key_code]
+    """The keys to watch in get_response method."""
     instructions = []
+    """instructions on the task given to the user. Should be overwritten as it is empty in template."""
     trials = 10
+    """Number of trials by user."""
     example = False
+    """Whether your task should show an exemple. If True, you should overwrite the example method. Can be overwritten 
+    at init"""
 
     def __init__(self, csv_folder, example=None):
         """
@@ -65,27 +70,44 @@ class TaskTemplate:
             depth=0.0
         )
 
-    def wait(self):
-        """wait until user presses <self.yes_key_code>"""
+    def wait_yes(self):
+        """wait until user presses <self.yes_key_code>
+        """
         while self.get_response() != self.yes_key_code:
             pass
 
     @staticmethod
     def quit_experiment():
-        """
-        Ends the experiment
+        """Ends the experiment
         """
         exit()
 
-    def get_response(self, keys=None):
+    def get_response(self, keys=None, timeout=float("inf")):
         """Waits for a response from the participant.
         Pressing Q while the function is wait for a response will quit the experiment.
-        Returns the pressed key and the reaction time.
+        Returns the pressed key.
         """
         if keys is None:
             keys = self.keys
-        resp = event.waitKeys(keyList=keys, clearEvents=True)
+        resp = event.waitKeys(keyList=keys, clearEvents=True, maxWait=timeout)
+        if resp is None:
+            return
         if resp[0] == "q":
+            self.quit_experiment()
+        return resp[0]
+
+    def get_response_with_time(self, keys=None, timeout=float("inf")):
+        """Waits for a response from the participant.
+                Pressing Q while the function is wait for a response will quit the experiment.
+                Returns the pressed key and time (in seconds) since the method has been launched.
+                """
+        if keys is None:
+            keys = self.keys
+        clock = core.Clock()
+        resp = event.waitKeys(timeout, keys,  timeStamped=clock)
+        if resp is None:
+            return
+        if resp[0][0] == "q":
             self.quit_experiment()
         return resp[0]
 
