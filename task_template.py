@@ -1,7 +1,5 @@
 from psychopy import visual, gui, data, event
 
-import os
-
 
 class TaskTemplate:
     """
@@ -90,3 +88,8 @@ class TaskTemplate:
         if resp[0] == "q":
             self.quit_experiment()
         return resp[0]
+
+    def task(self):
+        """Method to overwrite to implement your cognitive task. This method doesn't take any parameter
+        """
+        pass
