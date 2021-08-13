@@ -65,6 +65,7 @@ class TaskTemplate:
             self.launch_example = launch_example
 
     def update_csv(self, *args):
+        args = list(map(str, args))
         self.dataFile.write(", ".join(args))
         self.dataFile.write("\n")
 
@@ -150,9 +151,9 @@ class TaskTemplate:
         self.create_visual_text(self.welcome).draw()
         self.win.flip()
         core.wait(2)
-        next = self.create_visual_text(self.next)
+        next = self.create_visual_text(self.next, (0, -0.4), 0.04)
         for instr in self.instructions:
-            self.create_visual_text(instr, (0, -0.4), 0.04).draw()
+            self.create_visual_text(instr).draw()
             next.draw()
             self.win.flip()
             self.wait_yes()
