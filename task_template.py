@@ -142,12 +142,13 @@ class TaskTemplate:
         :param no_trial: Trial number (starting from 0).
         """
 
-    def example(self):
+    def example(self, exp_start_timestamp):
         """Method to overwrite to implement an example in your cognitive task. Will be launch only if
         <self.launch_example> is True.
         """
 
     def start(self):
+        exp_start_timestamp = time.time()
         self.win.winHandle.set_fullscreen(True)
         self.win.flip()
         self.win.mouseVisible = False
@@ -161,11 +162,10 @@ class TaskTemplate:
             self.win.flip()
             self.wait_yes()
         if self.launch_example:
-            self.example()
+            self.example(exp_start_timestamp)
         self.create_visual_text(self.good_luck).draw()
         self.win.flip()
         core.wait(2)
-        exp_start_timestamp = time.time()
         for i in range(self.trials):
             trial_start_timestamp = time.time()
             self.task(i, exp_start_timestamp, trial_start_timestamp)
