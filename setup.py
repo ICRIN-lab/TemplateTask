@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
   name='task_template',
-  packages=['task_template'],
+  py_modules=['task_template'],
   version='1.0.0',
   license='MIT',
   description='Template for cognitive tasks',
