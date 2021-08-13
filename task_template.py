@@ -63,6 +63,11 @@ class TaskTemplate:
         self.dataFile.write("\n")
         if launch_example is not None:
             self.launch_example = launch_example
+        self.init()
+
+    def init(self):
+        """Function launched at the end of constructor if you want to create instance variables or execute some code
+        at initialization"""
 
     def update_csv(self, *args):
         args = list(map(str, args))
@@ -136,13 +141,11 @@ class TaskTemplate:
         :param exp_start_timestamp: Timestamp got right before first trial
         :param no_trial: Trial number (starting from 0).
         """
-        pass
 
     def example(self):
         """Method to overwrite to implement an example in your cognitive task. Will be launch only if
         <self.launch_example> is True.
         """
-        pass
 
     def start(self):
         self.win.winHandle.set_fullscreen(True)
