@@ -12,6 +12,8 @@ TemplateTask uses the [PsychoPy library](https://psychopy.org/index.html):
 
 Make sure to download the package [here](https://www.psychopy.org/download.html) before using our template.
 
+ALSO EXPLAIN THAT YOU NEED TO DOWNLOAD IT FOR OTHER TAKS TO WORK AND EXPLAIN HOW TO DL.
+
 ## Contributions
 
 To contribute, please fork the repository, hack in a feature branch, and send a
