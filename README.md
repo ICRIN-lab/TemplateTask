@@ -3,7 +3,7 @@
 TemplateTask is an open-source template for creating experiments in behavioral science. 
 It aims to provide a template for developping cognitive tasks.
 
-To meet this goal, TemplateTask provides a template which you can use to write your experiments in Python code. 
+To meet this goal, TemplateTask provides a template which one can use to write experiments in Python code. 
 The entire template is written in Python.
 
 TemplateTask uses the [PsychoPy library](https://psychopy.org/index.html):
@@ -12,7 +12,12 @@ TemplateTask uses the [PsychoPy library](https://psychopy.org/index.html):
 
 Make sure to download the package [here](https://www.psychopy.org/download.html) before using our template.
 
-ALSO EXPLAIN THAT YOU NEED TO DOWNLOAD IT FOR OTHER TAKS TO WORK AND EXPLAIN HOW TO DL.
+## TemplateTask usage
+
+One has two reasons to use this package:
+
+* develop a task easier;
+* use one of our already developed tasks (which one can find here: 
 
 ## Contributions
 
@@ -23,12 +28,17 @@ pull request.
 
 ### Imports
 
+As said previously, we use the package PsychoPy to run the tasks, hence its import.
+Furthermore, most tasks require the import of time, as the time spent by the participants is a valuable data.
+
 ```python
 from psychopy import visual, gui, data, event, core
 import time
 ```
 
 ### TaskTemplate class 
+
+
 
 ```python
 class TaskTemplate:
