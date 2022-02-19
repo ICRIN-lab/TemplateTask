@@ -1,4 +1,5 @@
 from psychopy import visual, gui, data, event, core
+from psychopy.visual.shape import BaseShapeStim
 import time
 
 
@@ -45,7 +46,7 @@ class TaskTemplate:
         :param launch_example: Can overwrite default <self.example> value.
         """
         self.win = visual.Window(
-            size=[1920, 1080],  # if needed, change the size in corcondance with your monitor
+            size=[1920, 1080],  # if needed, change the size in concordance with your monitor
             fullscr=False,
             units="pix",
             screen=0,
@@ -74,7 +75,7 @@ class TaskTemplate:
         self.dataFile.write(", ".join(args))
         self.dataFile.write("\n")
 
-    def create_visual_text(self, text, pos=(0, 0), font_size=0.06):
+    def create_visual_text(self, text, pos=(0, 0), font_size=0.06, color="white", units='height'):
         """
         Create a <visual.TextStim> with some default parameters so it's simpler to create visual texts
         """
@@ -82,16 +83,42 @@ class TaskTemplate:
             win=self.win,
             text=text,
             font='Arial',
-            units='height',
+            units=units,
             pos=pos,
             height=font_size,
             wrapWidth=None,
             ori=0,
-            color=self.text_color,
+            color=color,
             colorSpace='rgb',
             opacity=1,
             languageStyle='LTR',
-            depth=0.0
+            depth=1
+        )
+
+    def create_visual_image(self, image, pos=(0, 0), ori=0.0, units='pix'):
+        return visual.ImageStim(
+            win=self.win,
+            image=image,
+            pos=pos,
+            ori=ori,
+            units=units)
+
+    def create_visual_rect(self, color):
+        return visual.Rect(
+            win=self.win,
+            width=300,
+            height=100,
+            lineColor=color,
+            fillColor=color,
+        )
+
+    def create_visual_circle(self, color, pos):
+        return visual.Circle(
+            win=self.win,
+            radius=30,
+            fillColor=color,
+            lineWidth=0,
+            pos=pos,
         )
 
     def wait_yes(self):
@@ -128,9 +155,9 @@ class TaskTemplate:
         if keys is None:
             keys = self.keys
         clock = core.Clock()
-        resp = event.waitKeys(timeout, keys,  timeStamped=clock)
+        resp = event.waitKeys(timeout, keys, timeStamped=clock)
         if resp is None:
-            return
+            return resp
         if resp[0][0] == self.quit_code:
             self.quit_experiment()
         return resp[0]
