@@ -1,6 +1,7 @@
 from psychopy import visual, gui, data, event, core
 from psychopy.visual.shape import BaseShapeStim
 import time
+from screeninfo import get_monitors
 
 
 class TaskTemplate:
@@ -46,7 +47,7 @@ class TaskTemplate:
         :param launch_example: Can overwrite default <self.example> value.
         """
         self.win = visual.Window(
-            size=[1920, 1080],  # if needed, change the size in concordance with your monitor
+            size=[get_monitors()[0].width, get_monitors()[0].height],  # if needed, change the size in concordance with your monitor
             fullscr=False,
             units="pix",
             screen=0,
@@ -95,10 +96,11 @@ class TaskTemplate:
             depth=1
         )
 
-    def create_visual_image(self, image, pos=(0, 0), ori=0.0, units='pix'):
+    def create_visual_image(self, image, size, pos=(0, 0), ori=0.0, units='pix'):
         return visual.ImageStim(
             win=self.win,
             image=image,
+            size=size,
             pos=pos,
             ori=ori,
             units=units)
