@@ -35,9 +35,9 @@ class TaskTemplate:
     """instructions on the task given to the user. Should be overwritten as it is empty in template."""
     next = f"Pour passer à l'instruction suivante, appuyez sur la touche {yes_key_name}"
     """text to show between 2 screens of instructions."""
-    good_luck = "Bonne chance !"
+    good_luck = "Prêt ?  C'est à vous !"
     """Good luck text to show right before first trial"""
-    end = "Le mini-jeu est à présent terminé. Merci, et au revoir !"
+    end = "Cette tâche cognitive est à présent terminée. Merci, au revoir !"
     """Text to show when all trials are done, and before the end."""
     csv_headers = []
     """Headers of CSV file. Should be overwritten as it is empty in this template."""
