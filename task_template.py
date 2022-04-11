@@ -33,6 +33,8 @@ class TaskTemplate:
     """Welcome text shown when the task is started."""
     instructions = []
     """instructions on the task given to the user. Should be overwritten as it is empty in template."""
+    font_size_instr = 0.06
+    """Text size of the instructions"""
     next = f"Pour passer à l'instruction suivante, appuyez sur la touche {yes_key_name}"
     """text to show between 2 screens of instructions."""
     good_luck = "Bonne chance !"
@@ -186,7 +188,7 @@ class TaskTemplate:
         core.wait(2)
         next = self.create_visual_text(self.next, (0, -0.4), 0.04)
         for instr in self.instructions:
-            self.create_visual_text(instr).draw()
+            self.create_visual_text(instr, font_size=self.font_size_instr).draw()
             next.draw()
             self.win.flip()
             self.wait_yes()
