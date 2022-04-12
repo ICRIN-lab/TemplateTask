@@ -61,7 +61,7 @@ class TaskTemplate:
         exp_info = {'participant': '', "date": data.getDateStr()}
         gui.DlgFromDict(exp_info, title='Subliminal Priming Task', fixed=["date"])
         self.participant = exp_info["participant"]
-        file_name = exp_info['participant'] + '_' + exp_info['date']
+        file_name = exp_info['participant'] + '_' + exp_info['date'][:-7]
         self.dataFile = open(f"{csv_folder}/{file_name}.csv", 'w')
         self.dataFile.write(", ".join(self.csv_headers))
         self.dataFile.write("\n")
