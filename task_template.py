@@ -39,7 +39,7 @@ class TaskTemplate:
     """text to show between 2 screens of instructions."""
     good_luck = "Bonne chance !"
     """Good luck text to show right before first trial"""
-    end = "Le mini-jeu est à présent terminé. Merci, et au revoir !"
+    end = "La tâche cognitive est à présent terminée. Merci, et au revoir !"
     """Text to show when all trials are done, and before the end."""
     csv_headers = []
     """Headers of CSV file. Should be overwritten as it is empty in this template."""
@@ -202,6 +202,6 @@ class TaskTemplate:
             self.task(i, exp_start_timestamp, trial_start_timestamp)
         self.create_visual_text(self.end).draw()
         self.win.flip()
-        core.wait(2)
+        core.wait(60)
         self.dataFile.close()
         self.quit_experiment()
