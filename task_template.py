@@ -1,7 +1,10 @@
+import os
+
 from psychopy import visual, gui, data, event, core
 from psychopy.visual.shape import BaseShapeStim
 import time
 from screeninfo import get_monitors
+from PIL import Image
 
 
 class TaskTemplate:
@@ -49,7 +52,8 @@ class TaskTemplate:
         :param launch_example: Can overwrite default <self.example> value.
         """
         self.win = visual.Window(
-            size=[get_monitors()[0].width, get_monitors()[0].height],  # if needed, change the size in concordance with your monitor
+            size=[get_monitors()[0].width, get_monitors()[0].height],
+            # if needed, change the size in concordance with your monitor
             fullscr=False,
             units="pix",
             screen=0,
@@ -78,6 +82,27 @@ class TaskTemplate:
         self.dataFile.write(", ".join(args))
         self.dataFile.write("\n")
 
+    def size(self, img):
+        image = Image.open(f'img/{img}')
+        imgwidth, imgheight = image.size
+
+        while imgwidth > get_monitors()[0].width:
+            imgwidth = imgwidth * 0.9
+            imgheight = imgheight * 0.9
+        while imgheight > get_monitors()[0].height:
+            imgwidth = imgwidth * 0.9
+            imgheight = imgheight * 0.9
+
+        return imgwidth, imgheight
+
+    def get_images(self, no_trial):
+        return [filename for filename in os.listdir('img')]
+
+    def get_good_ans(self, answer, dic_values):
+        for key, value in dic_values.items():
+            if answer == key:
+                return value
+
     def create_visual_text(self, text, pos=(0, 0), font_size=0.06, color="white", units='height'):
         """
         Create a <visual.TextStim> with some default parameters so it's simpler to create visual texts
@@ -95,7 +120,6 @@ class TaskTemplate:
             colorSpace='rgb',
             opacity=1,
             languageStyle='LTR',
-            depth=1
         )
 
     def create_visual_image(self, image, size, pos=(0, 0), ori=0.0, units='pix'):
@@ -124,6 +148,23 @@ class TaskTemplate:
             lineWidth=0,
             pos=pos,
         )
+
+    def check_break(self, no_trial, first_threshold, second_threshold=None):
+        if no_trial == first_threshold:
+            self.create_visual_text("10 minutes de pause").draw()
+            self.win.flip()
+            core.wait(540)
+            self.create_visual_text("Plus qu'une minute !").draw()
+            self.win.flip()
+            core.wait(60) 
+
+        elif second_threshold is not None and no_trial == second_threshold:
+            self.create_visual_text("5 minutes de pause").draw()
+            self.win.flip()
+            core.wait(240)
+            self.create_visual_text("Plus qu'une minute !").draw()
+            self.win.flip()
+            core.wait(60)
 
     def wait_yes(self):
         """wait until user presses <self.yes_key_code>
