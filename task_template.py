@@ -1,5 +1,5 @@
 import os
-
+import pyxid2
 from psychopy import visual, gui, data, event, core
 from psychopy.visual.shape import BaseShapeStim
 import time
@@ -51,6 +51,7 @@ class TaskTemplate:
         """
         :param launch_example: Can overwrite default <self.example> value.
         """
+        self.dev = None
         self.win = visual.Window(
             size=[get_monitors()[0].width, get_monitors()[0].height],
             # if needed, change the size in concordance with your monitor
@@ -76,6 +77,11 @@ class TaskTemplate:
     def init(self):
         """Function launched at the end of constructor if you want to create instance variables or execute some code
         at initialization"""
+        # get the device and save it
+        devices = pyxid2.get_xid_devices()
+        self.dev = devices[0]
+        self.dev.enable_usb_output('K', True)
+        print(self.dev)
 
     def update_csv(self, *args):
         args = list(map(str, args))
@@ -149,28 +155,44 @@ class TaskTemplate:
             pos=pos,
         )
 
-    def check_break(self, no_trial, first_threshold, second_threshold=None):
+    def check_break(self, no_trial, first_threshold, second_threshold=None, test=False):
         if no_trial == first_threshold:
             self.create_visual_text("10 minutes de pause").draw()
             self.win.flip()
-            core.wait(540)
+            if not test:
+                core.wait(540)
+            else:
+                core.wait(10)
             self.create_visual_text("Plus qu'une minute !").draw()
             self.win.flip()
-            core.wait(60) 
+            if not test:
+                core.wait(60)
+            else:
+                core.wait(10)
 
         elif second_threshold is not None and no_trial == second_threshold:
             self.create_visual_text("5 minutes de pause").draw()
             self.win.flip()
-            core.wait(240)
+            if not test:
+                core.wait(540)
+            else:
+                core.wait(10)
             self.create_visual_text("Plus qu'une minute !").draw()
             self.win.flip()
-            core.wait(60)
+            if not test:
+                core.wait(60)
+            else:
+                core.wait(10)
 
-    def wait_yes(self):
+    def wait_yes(self, dev=None):
         """wait until user presses <self.yes_key_code>
         """
-        while self.get_response() != self.yes_key_code:
-            pass
+        if dev is None:
+            while self.get_response() != self.yes_key_code:
+                pass
+        else:
+            while self.get_response_response_pad(dev) != self.yes_key_code:
+                pass
 
     def quit_experiment(self):
         """Ends the experiment
@@ -207,6 +229,40 @@ class TaskTemplate:
             self.quit_experiment()
         return resp[0]
 
+    def get_response_response_pad(self, dev, keys=None, timeout=float("inf")):
+        """Waits for a response from the participant using a response pad.
+            Pressing Q while the function is wait for a response will quit the experiment.
+            Returns the pressed key and time (in seconds) since the method has been launched.
+            """
+        if keys is None:
+            keys = self.keys
+        dev.clear_response_queue()
+        while not dev.has_response():
+            dev.poll_for_response()
+        resp = dev.get_next_response()
+        print("resp", resp)
+        dev.clear_response_queue()
+        if str(resp["key"]) == self.quit_code:
+            self.quit_experiment()
+        return str(resp["key"])
+
+    def get_response_with_time_response_pad(self, dev, keys=None, timeout=float("inf")):
+        """Waits for a response from the participant using a response pad.
+            Pressing Q while the function is wait for a response will quit the experiment.
+            Returns the pressed key and time (in seconds) since the method has been launched.
+            """
+        if keys is None:
+            keys = self.keys
+        dev.clear_response_queue()
+        while not dev.has_response():
+            dev.poll_for_response()
+        resp = dev.get_next_response()
+        print("resp : ", resp)
+        dev.clear_response_queue()
+        if str(resp["key"]) == self.quit_code:
+            self.quit_experiment()
+        return str(resp["key"]), resp["time"]/1000
+
     def task(self, no_trial, exp_start_timestamp, trial_start_timestamp):
         """Method to overwrite to implement your cognitive task.
         :param trial_start_timestamp: Timestamp got right before this trial
@@ -232,7 +288,7 @@ class TaskTemplate:
             self.create_visual_text(instr, font_size=self.font_size_instr).draw()
             next.draw()
             self.win.flip()
-            self.wait_yes()
+            self.wait_yes(self.dev) #response pad version
         if self.launch_example:
             self.example(exp_start_timestamp)
         self.create_visual_text(self.good_luck).draw()
