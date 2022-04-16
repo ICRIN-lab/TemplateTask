@@ -29,9 +29,13 @@ class TaskTemplate:
     """The keys to watch in get_response method."""
     trials = 10
     """Number of trials by user."""
+    nb_ans = 2
+    "Whether your task is a True/False or a Yes/No paradigm or not"
     launch_example = False
     """Whether your task should show an example. If True, you should overwrite the example method. Can be overwritten 
     at init"""
+    response_pad = True
+    "Where your task uses a Cedrus Response Pad or not. Put False if not."
     welcome = "Bienvenue !"
     """Welcome text shown when the task is started."""
     instructions = []
@@ -51,6 +55,14 @@ class TaskTemplate:
         """
         :param launch_example: Can overwrite default <self.example> value.
         """
+        self.right_key_code = None
+        self.right_key_name = None
+        self.mid_right_key_code = None
+        self.mid_right_key_name = None
+        self.mid_left_key_code = None
+        self.left_key_name = None
+        self.left_key_code = None
+        self.mid_left_key_name = None
         self.dev = None
         self.win = visual.Window(
             size=[get_monitors()[0].width, get_monitors()[0].height],
@@ -77,11 +89,51 @@ class TaskTemplate:
     def init(self):
         """Function launched at the end of constructor if you want to create instance variables or execute some code
         at initialization"""
-        # get the device and save it
-        devices = pyxid2.get_xid_devices()
-        self.dev = devices[0]
-        self.dev.enable_usb_output('K', True)
-        print(self.dev)
+        if self.response_pad:
+            # get the device and save it
+            devices = pyxid2.get_xid_devices()
+            self.dev = devices[0]
+            self.dev.enable_usb_output('K', True)
+            print(self.dev)
+            if self.nb_ans == 2:
+                self.yes_key_name = "rouge"
+                self.yes_key_code = "0"
+                self.no_key_name = "vert"
+                self.no_key_code = "6"
+                self.keys = [self.yes_key_code, self.no_key_code, "q"]
+            if self.nb_ans == 4:
+                self.left_key_name = "a"
+                self.left_key_code = "0"
+                self.mid_left_key_name = "z"
+                self.mid_left_key_code = "1"
+                self.mid_right_key_name = "o"
+                self.mid_right_key_code = "5"
+                self.right_key_name = "p"
+                self.right_key_code = "6"
+                self.quit_code = "3"
+                self.yes_key_code = "6"
+                self.keys = [self.left_key_code, self.mid_left_key_code, self.right_key_code, self.mid_right_key_code,
+                             self.yes_key_code, self.quit_code]
+        else:
+            if self.nb_ans == 2:
+                self.yes_key_name = "p"
+                self.yes_key_code = "p"
+                self.no_key_name = "a"
+                self.no_key_code = "a"
+                self.keys = [self.yes_key_code, self.no_key_code, "q"]
+            if self.nb_ans == 4:
+                self.left_key_name = "a"
+                self.left_key_code = "a"
+                self.mid_left_key_name = "z"
+                self.mid_left_key_code = "z"
+                self.mid_right_key_name = "o"
+                self.mid_right_key_code = "o"
+                self.right_key_name = "p"
+                self.right_key_code = "p"
+                self.quit_code = "q"
+                self.yes_key_code = "p"
+                self.keys = [self.left_key_code, self.mid_left_key_code, self.right_key_code, self.mid_right_key_code,
+                             self.yes_key_code, self.quit_code]
 
     def update_csv(self, *args):
         args = list(map(str, args))
@@ -102,7 +154,7 @@ class TaskTemplate:
         return imgwidth, imgheight
 
     def get_images(self, no_trial):
-        return [filename for filename in os.listdir('img')]
+        return [filename for filename in os.listdir('../img')]
 
     def get_good_ans(self, answer, dic_values):
         for key, value in dic_values.items():
@@ -288,7 +340,10 @@ class TaskTemplate:
             self.create_visual_text(instr, font_size=self.font_size_instr).draw()
             next.draw()
             self.win.flip()
-            self.wait_yes(self.dev) #response pad version
+            if self.response_pad:
+                self.wait_yes(self.dev) #response pad version
+            else:
+                self.wait_yes()
         if self.launch_example:
             self.example(exp_start_timestamp)
         self.create_visual_text(self.good_luck).draw()
