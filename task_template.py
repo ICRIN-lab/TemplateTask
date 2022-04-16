@@ -269,7 +269,6 @@ class TaskTemplate:
             while not self.dev.has_response():
                 self.dev.poll_for_response()
             resp = self.dev.get_next_response()
-            print("resp", resp)
             self.dev.clear_response_queue()
             if str(resp["key"]) == self.quit_code:
                 self.quit_experiment()
@@ -294,7 +293,6 @@ class TaskTemplate:
             while not self.dev.has_response():
                 self.dev.poll_for_response()
             resp = self.dev.get_next_response()
-            print("resp : ", resp)
             self.dev.clear_response_queue()
             if str(resp["key"]) == self.quit_code:
                 self.quit_experiment()
