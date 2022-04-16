@@ -338,7 +338,7 @@ class TaskTemplate:
             self.example(exp_start_timestamp)
         self.create_visual_text(self.good_luck).draw()
         self.win.flip()
-        core.wait(2)
+        self.wait_yes(self.response_pad)
         for i in range(self.trials):
             trial_start_timestamp = time.time()
             self.task(i, exp_start_timestamp, trial_start_timestamp)
