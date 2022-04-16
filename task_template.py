@@ -98,11 +98,12 @@ class TaskTemplate:
             self.dev.enable_usb_output('K', True)
             print(self.dev)
             if self.nb_ans == 2:
-                self.yes_key_name = "rouge"
-                self.yes_key_code = "0"
-                self.no_key_name = "vert"
-                self.no_key_code = "6"
-                self.keys = [self.yes_key_code, self.no_key_code, "q"]
+                self.yes_key_name = "vert"
+                self.yes_key_code = "6"
+                self.no_key_name = "rouge"
+                self.no_key_code = "0"
+                self.quit_code = "3"
+                self.keys = [self.yes_key_code, self.no_key_code, self.quit_code]
             if self.nb_ans == 4:
                 self.left_key_name = "a"
                 self.left_key_code = "0"
@@ -118,9 +119,9 @@ class TaskTemplate:
                              self.yes_key_code, self.quit_code]
         else:
             if self.nb_ans == 2:
-                self.yes_key_name = "p"
+                self.yes_key_name = "vert"
                 self.yes_key_code = "p"
-                self.no_key_name = "a"
+                self.no_key_name = "rouge"
                 self.no_key_code = "a"
                 self.keys = [self.yes_key_code, self.no_key_code, "q"]
             if self.nb_ans == 4:
@@ -145,7 +146,6 @@ class TaskTemplate:
     def size(self, img):
         image = Image.open(f'img/{img}')
         imgwidth, imgheight = image.size
-
         while imgwidth > get_monitors()[0].width:
             imgwidth = imgwidth * 0.9
             imgheight = imgheight * 0.9
@@ -241,12 +241,8 @@ class TaskTemplate:
     def wait_yes(self, response_pad):
         """wait until user presses <self.yes_key_code>
         """
-        if response_pad:
-            while self.get_response_response_pad(self.dev) != self.yes_key_code:
-                pass
-        else:
-            while self.get_response() != self.yes_key_code:
-                pass
+        while self.get_response(self.response_pad) != self.yes_key_code:
+            pass
 
 
     def quit_experiment(self):
@@ -255,68 +251,58 @@ class TaskTemplate:
         self.dataFile.close()
         exit()
 
-    def get_response(self, keys=None, timeout=float("inf")):
+    def get_response(self, response_pad, keys=None, timeout=float("inf")):
         """Waits for a response from the participant.
         Pressing Q while the function is wait for a response will quit the experiment.
         Returns the pressed key.
         """
+
         if keys is None:
             keys = self.keys
-        resp = event.waitKeys(keyList=keys, clearEvents=True, maxWait=timeout)
-        if resp is None:
-            return
-        if resp[0] == self.quit_code:
-            self.quit_experiment()
-        return resp[0]
 
-    def get_response_with_time(self, keys=None, timeout=float("inf")):
+        if response_pad:
+            self.dev.clear_response_queue()
+            while not self.dev.has_response():
+                self.dev.poll_for_response()
+            resp = self.dev.get_next_response()
+            print("resp", resp)
+            self.dev.clear_response_queue()
+            if str(resp["key"]) == self.quit_code:
+                self.quit_experiment()
+            return str(resp["key"])
+        else:
+            resp = event.waitKeys(keyList=keys, clearEvents=True, maxWait=timeout)
+            if resp is None:
+                return
+            if resp[0] == self.quit_code:
+                self.quit_experiment()
+            return resp[0]
+
+    def get_response_with_time(self, response_pad, keys=None, timeout=float("inf")):
         """Waits for a response from the participant.
                 Pressing Q while the function is wait for a response will quit the experiment.
                 Returns the pressed key and time (in seconds) since the method has been launched.
                 """
         if keys is None:
             keys = self.keys
-        clock = core.Clock()
-        resp = event.waitKeys(timeout, keys, timeStamped=clock)
-        if resp is None:
-            return resp
-        if resp[0][0] == self.quit_code:
-            self.quit_experiment()
-        return resp[0]
-
-    def get_response_response_pad(self, dev, keys=None, timeout=float("inf")):
-        """Waits for a response from the participant using a response pad.
-            Pressing Q while the function is wait for a response will quit the experiment.
-            Returns the pressed key and time (in seconds) since the method has been launched.
-            """
-        if keys is None:
-            keys = self.keys
-        dev.clear_response_queue()
-        while not dev.has_response():
-            dev.poll_for_response()
-        resp = dev.get_next_response()
-        print("resp", resp)
-        dev.clear_response_queue()
-        if str(resp["key"]) == self.quit_code:
-            self.quit_experiment()
-        return str(resp["key"])
-
-    def get_response_with_time_response_pad(self, dev, keys=None, timeout=float("inf")):
-        """Waits for a response from the participant using a response pad.
-            Pressing Q while the function is wait for a response will quit the experiment.
-            Returns the pressed key and time (in seconds) since the method has been launched.
-            """
-        if keys is None:
-            keys = self.keys
-        dev.clear_response_queue()
-        while not dev.has_response():
-            dev.poll_for_response()
-        resp = dev.get_next_response()
-        print("resp : ", resp)
-        dev.clear_response_queue()
-        if str(resp["key"]) == self.quit_code:
-            self.quit_experiment()
-        return str(resp["key"]), resp["time"]/1000
+        if response_pad:
+            self.dev.clear_response_queue()
+            while not self.dev.has_response():
+                self.dev.poll_for_response()
+            resp = self.dev.get_next_response()
+            print("resp : ", resp)
+            self.dev.clear_response_queue()
+            if str(resp["key"]) == self.quit_code:
+                self.quit_experiment()
+            return str(resp["key"]), resp["time"] / 1000
+        else:
+            clock = core.Clock()
+            resp = event.waitKeys(timeout, keys, timeStamped=clock)
+            if resp is None:
+                return resp
+            if resp[0][0] == self.quit_code:
+                self.quit_experiment()
+            return resp[0]
 
     def task(self, no_trial, exp_start_timestamp, trial_start_timestamp):
         """Method to overwrite to implement your cognitive task.
