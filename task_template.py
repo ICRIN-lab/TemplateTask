@@ -104,7 +104,7 @@ class TaskTemplate:
                 self.no_key_code = "0"
                 self.quit_code = "3"
                 self.keys = [self.yes_key_code, self.no_key_code, self.quit_code]
-            if self.nb_ans == 4:
+            elif self.nb_ans == 4:
                 self.left_key_name = "a"
                 self.left_key_code = "0"
                 self.mid_left_key_name = "z"
@@ -126,6 +126,7 @@ class TaskTemplate:
                 self.quit_code = "q"
                 self.keys = [self.yes_key_code, self.no_key_code, self.quit_code]
             elif self.nb_ans == 4:
+                print("IN !")
                 self.left_key_name = "a"
                 self.left_key_code = "a"
                 self.mid_left_key_name = "z"
@@ -136,8 +137,10 @@ class TaskTemplate:
                 self.right_key_code = "p"
                 self.quit_code = "q"
                 self.yes_key_code = "p"
+                self.yes_key_name = "p"
                 self.keys = [self.left_key_code, self.mid_left_key_code, self.right_key_code, self.mid_right_key_code,
-                             self.yes_key_code, self.quit_code]
+                             self.quit_code]
+                print(self.keys)
 
     def update_csv(self, *args):
         args = list(map(str, args))
@@ -265,7 +268,6 @@ class TaskTemplate:
             while not self.dev.has_response():
                 self.dev.poll_for_response()
             resp = self.dev.get_next_response()
-            print("resp", resp)
             self.dev.clear_response_queue()
             if str(resp["key"]) == self.quit_code:
                 self.quit_experiment()
@@ -290,7 +292,6 @@ class TaskTemplate:
             while not self.dev.has_response():
                 self.dev.poll_for_response()
             resp = self.dev.get_next_response()
-            print("resp : ", resp)
             self.dev.clear_response_queue()
             if str(resp["key"]) == self.quit_code:
                 self.quit_experiment()
