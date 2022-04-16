@@ -36,6 +36,8 @@ class TaskTemplate:
     at init"""
     response_pad = True
     "Where your task uses a Cedrus Response Pad or not. Put False if not."
+    dev = None
+    "Cedrus ResponsePad RB-740"
     welcome = "Bienvenue !"
     """Welcome text shown when the task is started."""
     instructions = []
@@ -63,7 +65,7 @@ class TaskTemplate:
         self.left_key_name = None
         self.left_key_code = None
         self.mid_left_key_name = None
-        self.dev = None
+
         self.win = visual.Window(
             size=[get_monitors()[0].width, get_monitors()[0].height],
             # if needed, change the size in concordance with your monitor
@@ -236,15 +238,16 @@ class TaskTemplate:
             else:
                 core.wait(10)
 
-    def wait_yes(self, dev=None):
+    def wait_yes(self, response_pad):
         """wait until user presses <self.yes_key_code>
         """
-        if dev is None:
-            while self.get_response() != self.yes_key_code:
+        if response_pad:
+            while self.get_response_response_pad(self.dev) != self.yes_key_code:
                 pass
         else:
-            while self.get_response_response_pad(dev) != self.yes_key_code:
+            while self.get_response() != self.yes_key_code:
                 pass
+
 
     def quit_experiment(self):
         """Ends the experiment
@@ -340,10 +343,7 @@ class TaskTemplate:
             self.create_visual_text(instr, font_size=self.font_size_instr).draw()
             next.draw()
             self.win.flip()
-            if self.response_pad:
-                self.wait_yes(self.dev) #response pad version
-            else:
-                self.wait_yes()
+            self.wait_yes(self.response_pad)
         if self.launch_example:
             self.example(exp_start_timestamp)
         self.create_visual_text(self.good_luck).draw()
