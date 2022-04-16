@@ -98,7 +98,7 @@ class TaskTemplate:
             self.dev.enable_usb_output('K', True)
             print(self.dev)
             if self.nb_ans == 2:
-                self.yes_key_name = "vert"
+                self.yes_key_name = "verte"
                 self.yes_key_code = "6"
                 self.no_key_name = "rouge"
                 self.no_key_code = "0"
@@ -119,12 +119,13 @@ class TaskTemplate:
                              self.yes_key_code, self.quit_code]
         else:
             if self.nb_ans == 2:
-                self.yes_key_name = "vert"
+                self.yes_key_name = "p"
                 self.yes_key_code = "p"
-                self.no_key_name = "rouge"
+                self.no_key_name = "a"
                 self.no_key_code = "a"
-                self.keys = [self.yes_key_code, self.no_key_code, "q"]
-            if self.nb_ans == 4:
+                self.quit_code = "q"
+                self.keys = [self.yes_key_code, self.no_key_code, self.quit_code]
+            elif self.nb_ans == 4:
                 self.left_key_name = "a"
                 self.left_key_code = "a"
                 self.mid_left_key_name = "z"
