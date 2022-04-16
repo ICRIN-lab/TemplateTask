@@ -245,7 +245,6 @@ class TaskTemplate:
         while self.get_response(self.response_pad) != self.yes_key_code:
             pass
 
-
     def quit_experiment(self):
         """Ends the experiment
         """
