@@ -218,7 +218,7 @@ class TaskTemplate:
             self.create_visual_text("10 minutes de pause").draw()
             self.win.flip()
             if not test:
-                core.wait(540)
+                core.wait(240)  # five minuts break
             else:
                 core.wait(10)
             self.create_visual_text("Plus qu'une minute !").draw()
@@ -232,7 +232,7 @@ class TaskTemplate:
             self.create_visual_text("5 minutes de pause").draw()
             self.win.flip()
             if not test:
-                core.wait(540)
+                core.wait(60)  # two minuts break
             else:
                 core.wait(10)
             self.create_visual_text("Plus qu'une minute !").draw()
