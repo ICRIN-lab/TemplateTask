@@ -215,10 +215,10 @@ class TaskTemplate:
 
     def check_break(self, no_trial, first_threshold, second_threshold=None, test=False):
         if no_trial == first_threshold:
-            self.create_visual_text("10 minutes de pause").draw()
+            self.create_visual_text("2 minutes de pause").draw()
             self.win.flip()
             if not test:
-                core.wait(60)  # five minuts break
+                core.wait(60)  # two minuts break
             else:
                 core.wait(10)
             self.create_visual_text("Plus qu'une minute !").draw()
@@ -229,7 +229,7 @@ class TaskTemplate:
                 core.wait(10)
 
         elif second_threshold is not None and no_trial == second_threshold:
-            self.create_visual_text("5 minutes de pause").draw()
+            self.create_visual_text("2 minutes de pause").draw()
             self.win.flip()
             if not test:
                 core.wait(60)  # two minuts break
