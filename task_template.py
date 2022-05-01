@@ -48,7 +48,7 @@ class TaskTemplate:
     """text to show between 2 screens of instructions."""
     good_luck = "Bonne chance !"
     """Good luck text to show right before first trial"""
-    end = "La tâche cognitive est à présent terminée. Merci, et au revoir !"
+    end = "L'expérience est à présent terminée.\n\n Veuillez appeler l'examinateur. \n\n Merci, et au revoir !"
     """Text to show when all trials are done, and before the end."""
     csv_headers = []
     """Headers of CSV file. Should be overwritten as it is empty in this template."""
