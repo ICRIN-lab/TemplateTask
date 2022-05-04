@@ -286,11 +286,12 @@ class TaskTemplate:
         if keys is None:
             keys = self.keys
         if response_pad:
-            self.dev.clear_response_queue()
+            for i in range(1, 100):
+                self.dev.poll_for_response()
+                self.dev.clear_response_queue()
             while not self.dev.has_response():
                 self.dev.poll_for_response()
             resp = self.dev.get_next_response()
-            self.dev.clear_response_queue()
             if str(resp["key"]) == self.quit_code:
                 self.quit_experiment()
             return str(resp["key"]), resp["time"] / 1000
