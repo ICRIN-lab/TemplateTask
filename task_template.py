@@ -142,7 +142,7 @@ class TaskTemplate:
 
     def update_csv(self, *args):
         args = list(map(str, args))
-        self.dataFile.write(", ".join(args))
+        self.dataFile.write(",".join(args))
         self.dataFile.write("\n")
 
     def size(self, img):
