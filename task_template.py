@@ -82,7 +82,7 @@ class TaskTemplate:
         self.participant = exp_info["participant"]
         file_name = exp_info['participant'] + '_' + exp_info['date'][:-7]
         self.dataFile = open(f"{csv_folder}/{file_name}.csv", 'w')
-        self.dataFile.write(", ".join(self.csv_headers))
+        self.dataFile.write(",".join(self.csv_headers))
         self.dataFile.write("\n")
         if launch_example is not None:
             self.launch_example = launch_example
