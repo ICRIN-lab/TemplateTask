@@ -323,7 +323,7 @@ class TaskTemplate:
         :param no_trial: Trial number (starting from 0).
         """
 
-    def example(self, exp_start_timestamp):
+    def example(self):
         """Method to overwrite to implement an example in your cognitive task. Will be launch only if
         <self.launch_example> is True.
         """
@@ -344,7 +344,7 @@ class TaskTemplate:
             self.win.flip()
             self.wait_yes(self.yes_key_code)
         if self.launch_example:
-            self.example(exp_start_timestamp)
+            self.example()
         self.create_visual_text(self.good_luck).draw()
         flag.draw()
         self.win.flip()
