@@ -23,6 +23,10 @@ class TaskTemplate:
     """Set code for "no" key. Default value is "n". """
     no_key_name = "verte"
     """Set name for "no" key. Default value is "verte" (green in french)."""
+    flag_code = "f"
+    """Flag to determine beginning of the task on the EEG. Default value is "f"""
+    flag_name = "de couleur violette au centre"
+    """Set name for "flag" key. Default value is "pastille mauve centrale"""
     quit_code = "q"
     """A backdoor to escape task """
     keys = [yes_key_code, no_key_code, "q"]
@@ -46,12 +50,16 @@ class TaskTemplate:
     """Text size of the instructions"""
     next = f"Pour passer à l'instruction suivante, appuyez sur la touche {yes_key_name}"
     """text to show between 2 screens of instructions."""
+    flag = f"Pour débuter l'expérience, appuyez sur la touche {flag_name}"
+    """text to show at the beginning of the task"""
     good_luck = "Bonne chance !"
     """Good luck text to show right before first trial"""
     end = "L'expérience est à présent terminée.\n\n Veuillez appeler l'examinateur. \n\n Merci, et au revoir !"
     """Text to show when all trials are done, and before the end."""
     csv_headers = []
     """Headers of CSV file. Should be overwritten as it is empty in this template."""
+    exp_start_timestamp = time.time()
+    "Determine the absolute timestamp of the task"
 
     def __init__(self, csv_folder, launch_example=None):
         """
@@ -102,8 +110,9 @@ class TaskTemplate:
                 self.yes_key_code = "6"
                 self.no_key_name = "rouge"
                 self.no_key_code = "0"
-                self.quit_code = "3"
-                self.keys = [self.yes_key_code, self.no_key_code, self.quit_code]
+                self.quit_code = "q"
+                self.flag_code = "3"
+                self.keys = [self.yes_key_code, self.no_key_code, self.flag_code, self.quit_code]
             elif self.nb_ans == 4:
                 self.left_key_name = "a"
                 self.left_key_code = "0"
@@ -113,18 +122,20 @@ class TaskTemplate:
                 self.mid_right_key_code = "5"
                 self.right_key_name = "p"
                 self.right_key_code = "6"
-                self.quit_code = "3"
+                self.flag_code = "3"
+                self.quit_code = "q"
                 self.yes_key_code = "6"
                 self.keys = [self.left_key_code, self.mid_left_key_code, self.right_key_code, self.mid_right_key_code,
-                             self.yes_key_code, self.quit_code]
+                             self.yes_key_code, self.flag_code, self.quit_code]
         else:
             if self.nb_ans == 2:
                 self.yes_key_name = "p"
                 self.yes_key_code = "p"
                 self.no_key_name = "a"
                 self.no_key_code = "a"
+                self.flag_code = "f"
                 self.quit_code = "q"
-                self.keys = [self.yes_key_code, self.no_key_code, self.quit_code]
+                self.keys = [self.yes_key_code, self.no_key_code, self.flag_code, self.quit_code]
             elif self.nb_ans == 4:
                 self.left_key_name = "a"
                 self.left_key_code = "a"
@@ -135,10 +146,11 @@ class TaskTemplate:
                 self.right_key_name = "p"
                 self.right_key_code = "p"
                 self.quit_code = "q"
+                self.flag_code = "f"
                 self.yes_key_code = "p"
                 self.yes_key_name = "p"
                 self.keys = [self.left_key_code, self.mid_left_key_code, self.right_key_code, self.mid_right_key_code,
-                             self.quit_code]
+                             self.flag_code, self.quit_code]
 
     def update_csv(self, *args):
         args = list(map(str, args))
@@ -240,10 +252,10 @@ class TaskTemplate:
             else:
                 core.wait(10)
 
-    def wait_yes(self, response_pad):
+    def wait_yes(self, key):
         """wait until user presses <self.yes_key_code>
         """
-        while self.get_response(self.response_pad) != self.yes_key_code:
+        while self.get_response(self.response_pad) != key:
             pass
 
     def quit_experiment(self):
@@ -304,7 +316,7 @@ class TaskTemplate:
                 self.quit_experiment()
             return resp[0]
 
-    def task(self, no_trial, exp_start_timestamp, trial_start_timestamp):
+    def task(self, no_trial):
         """Method to overwrite to implement your cognitive task.
         :param trial_start_timestamp: Timestamp got right before this trial
         :param exp_start_timestamp: Timestamp got right before first trial
@@ -325,19 +337,22 @@ class TaskTemplate:
         self.win.flip()
         core.wait(2)
         next = self.create_visual_text(self.next, (0, -0.4), 0.04)
+        flag = self.create_visual_text(self.flag, (0, 0.4), 0.04)
         for instr in self.instructions:
             self.create_visual_text(instr, font_size=self.font_size_instr).draw()
             next.draw()
             self.win.flip()
-            self.wait_yes(self.response_pad)
+            self.wait_yes(self.yes_key_code)
         if self.launch_example:
             self.example(exp_start_timestamp)
         self.create_visual_text(self.good_luck).draw()
+        flag.draw()
+        self.win.flip()
+        self.wait_yes(self.flag_code)
         self.win.flip()
         core.wait(2)
         for i in range(self.trials):
-            trial_start_timestamp = time.time()
-            self.task(i, exp_start_timestamp, trial_start_timestamp)
+            self.task(i)
         self.create_visual_text(self.end).draw()
         self.win.flip()
         core.wait(60)
