@@ -60,6 +60,7 @@ class TaskTemplate:
     """Headers of CSV file. Should be overwritten as it is empty in this template."""
     exp_start_timestamp = time.time()
     "Determine the absolute timestamp of the task"
+    response_pad_timestamp = 0
 
     def __init__(self, csv_folder, launch_example=None):
         """
@@ -104,13 +105,14 @@ class TaskTemplate:
             devices = pyxid2.get_xid_devices()
             self.dev = devices[0]
             self.dev.enable_usb_output('K', True)
+            self.response_pad_timestamp = time.time()
             print(self.dev)
             if self.nb_ans == 2:
                 self.yes_key_name = "verte"
                 self.yes_key_code = "6"
                 self.no_key_name = "rouge"
                 self.no_key_code = "0"
-                self.quit_code = "q"
+                self.quit_code = "4"
                 self.flag_code = "3"
                 self.keys = [self.yes_key_code, self.no_key_code, self.flag_code, self.quit_code]
             elif self.nb_ans == 4:
@@ -123,7 +125,7 @@ class TaskTemplate:
                 self.right_key_name = "p"
                 self.right_key_code = "6"
                 self.flag_code = "3"
-                self.quit_code = "q"
+                self.quit_code = "4"
                 self.yes_key_code = "6"
                 self.keys = [self.left_key_code, self.mid_left_key_code, self.right_key_code, self.mid_right_key_code,
                              self.yes_key_code, self.flag_code, self.quit_code]
@@ -298,9 +300,7 @@ class TaskTemplate:
         if keys is None:
             keys = self.keys
         if response_pad:
-            for i in range(1, 100):
-                self.dev.poll_for_response()
-                self.dev.clear_response_queue()
+            self.dev.flush_serial_buffer()
             while not self.dev.has_response():
                 self.dev.poll_for_response()
             resp = self.dev.get_next_response()
@@ -318,8 +318,6 @@ class TaskTemplate:
 
     def task(self, no_trial):
         """Method to overwrite to implement your cognitive task.
-        :param trial_start_timestamp: Timestamp got right before this trial
-        :param exp_start_timestamp: Timestamp got right before first trial
         :param no_trial: Trial number (starting from 0).
         """
 
@@ -329,7 +327,6 @@ class TaskTemplate:
         """
 
     def start(self):
-        exp_start_timestamp = time.time()
         self.win.winHandle.set_fullscreen(True)
         self.win.flip()
         self.win.mouseVisible = False
