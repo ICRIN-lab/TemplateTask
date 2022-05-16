@@ -374,6 +374,7 @@ class TaskTemplate:
     def quit_experiment(self):
         """Ends the experiment
         """
+        self.unsubscribe()
         self.close_datafile()
         self.dataFile.close()
         exit()
@@ -604,7 +605,7 @@ class TaskTemplate:
                                          outline=(0, 0, 0, 255))
 
             result_msg.setText(
-                f'Accepter/Recommencer: {decision_key}\nRecalibrer des points: touches de 0 à 9 \nQuitter: Esc')
+                f'Accepter/Recommencer: espace\nRecalibrer des points: touches de 0 à 9 \nQuitter: Esc')
             result_img.setImage(img)
 
             waitkey = True
