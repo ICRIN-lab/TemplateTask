@@ -180,8 +180,8 @@ class TaskTemplate:
                                                     lineColor=None, lineWidth=1, autoLog=False)
         self.calibration_target_disc = visual.Circle(self.win,
                                                      radius=self.calibration_target_disc_size,
-                                                     fillColor='red',
-                                                     lineColor='red', lineWidth=1, autoLog=False)
+                                                     fillColor='lime',
+                                                     lineColor='white', lineWidth=1, autoLog=False)
 
         self.update_calibration = self.update_calibration_default
         if self.win.units == 'norm':  # fix oval
@@ -378,7 +378,7 @@ class TaskTemplate:
         self.dataFile.close()
         exit()
 
-    def get_response(self, response_pad, keys=None, timeout=float("inf")):
+    def get_response(self, keys=None, timeout=float("inf")):
         """Waits for a response from the participant.
         Pressing Q while the function is wait for a response will quit the experiment.
         Returns the pressed key.
@@ -387,7 +387,7 @@ class TaskTemplate:
         if keys is None:
             keys = self.keys
 
-        if response_pad:
+        if self.response_pad:
             self.dev.clear_response_queue()
             while not self.dev.has_response():
                 self.dev.poll_for_response()
@@ -404,14 +404,14 @@ class TaskTemplate:
                 self.quit_experiment()
             return resp[0]
 
-    def get_response_with_time(self, response_pad, keys=None, timeout=float("inf")):
+    def get_response_with_time(self, keys=None, timeout=float("inf")):
         """Waits for a response from the participant.
                 Pressing Q while the function is wait for a response will quit the experiment.
                 Returns the pressed key and time (in seconds) since the method has been launched.
                 """
         if keys is None:
             keys = self.keys
-        if response_pad:
+        if self.response_pad:
             self.dev.flush_serial_buffer()
             while not self.dev.has_response():
                 self.dev.poll_for_response()
@@ -528,19 +528,12 @@ class TaskTemplate:
         if not (2 <= len(calibration_points) <= 9):
             raise ValueError('Calibration points must be 2~9')
 
-        if enable_mouse:
-            mouse = event.Mouse(visible=False, win=self.win)
-
         img = Image.new('RGBA', tuple(self.win.size))
         img_draw = ImageDraw.Draw(img)
 
         result_img = visual.SimpleImageStim(self.win, img, autoLog=False)
         result_msg = visual.TextStim(self.win, pos=(0, -self.win.size[1] / 4),
-                                              color=text_color, units='pix', autoLog=False)
-        # result_img = self.create_visual_image(img, autolog=False)
-        # result_msg = self.create_visual_text(text="", pos=(0, -self.win.size[1] / 4), color=text_color,
-        # units="height", autolog=False)
-        # should be PIX
+                                     color=text_color, units='pix', autoLog=False)
         remove_marker = visual.Circle(
             self.win, radius=self.calibration_target_dot.radius * 5,
             fillColor='black', lineColor='white', lineWidth=1, autoLog=False)
@@ -564,25 +557,18 @@ class TaskTemplate:
             if shuffle:
                 np.random.shuffle(self.calibration_points)
 
-            if start_key is not None or enable_mouse:
+            if start_key is not None:
                 waitkey = True
                 if start_key is not None:
-                    if enable_mouse:
-                        result_msg.setText('Press {} or click left button to start calibration'.format(start_key))
-                    else:
-                        result_msg.setText('Press {} to start calibration'.format(start_key))
-                else:  # enable_mouse==True
-                    result_msg.setText('Click left button to start calibration')
+                    result_msg.setText(f'Appuyez sur la touche espace pour commencer la calibration')
                 while waitkey:
                     for key in event.getKeys():
                         if key == start_key:
                             waitkey = False
 
-                    if enable_mouse and mouse.getPressed()[0]:
-                        waitkey = False
-
                     result_msg.draw()
                     self.win.flip()
+
             else:
                 self.win.flip()
 
@@ -617,19 +603,12 @@ class TaskTemplate:
                                           (p[0] * self.win.size[0] + 3, p[1] * self.win.size[1] + 3)),
                                          outline=(0, 0, 0, 255))
 
-            if enable_mouse:
-                result_msg.setText(
-                    'Accept/Retry: {} or right-click\nSelect recalibration points: 0-9 key or left-click\nAbort: esc'.format(
-                        decision_key))
-            else:
-                result_msg.setText(
-                    'Accept/Retry: {}\nSelect recalibration points: 0-9 key\nAbort: esc'.format(decision_key))
+            result_msg.setText(
+                f'Accepter/Recommencer: {decision_key}\nRecalibrer des points: touches de 0 à 9 \nQuitter: Esc')
             result_img.setImage(img)
 
             waitkey = True
             self.retry_points = []
-            if enable_mouse:
-                mouse.setVisible(True)
             while waitkey:
                 for key in event.getKeys():
                     if key in [decision_key, 'escape']:
@@ -1160,7 +1139,7 @@ class TaskTemplate:
         self.open_datafile(f"csv_eyetracker/{self.file_name}.tsv", embed_events=False)
         self.set_calibration_keymap({'num_7': 0, 'num_9': 1, 'num_5': 2, 'num_1': 3, 'num_3': 4})
         self.show_status()
-        ret = self.run_calibration([(0, 0), (-0.4, 0.4), (0.4, 0.4), (0.0, 0.0), (-0.4, -0.4), (0.4, -0.4)])
+        ret = self.run_calibration([(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0), (-0.4, -0.4), (0.4, -0.4)])
 
         if ret == "abort":
             sys.exit()
