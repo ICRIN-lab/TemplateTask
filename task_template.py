@@ -579,7 +579,8 @@ class TaskTemplate:
 
             self.win.flip()
 
-            img_draw.rectangle(((0, 0), tuple(self.win.size)), fill=(0, 0, 0, 0))
+            # img_draw.rectangle(((0, 0), tuple(self.win.size)), fill=(0, 0, 0, 0))
+            # CHECK IF NEEDED !!!!!
             if calibration_result.status == tobii_research.CALIBRATION_STATUS_FAILURE:
                 # computeCalibration failed.
                 pass
@@ -977,7 +978,6 @@ class TaskTemplate:
                                        np.nan, np.nan, np.nan, 0, np.nan, np.nan)
 
                     self.datafile.write(format_string % output_data)
-                    print('kaka')
                     self.datafile.write('\t%s\n' % (event_text))
 
                     num_output_events += 1
