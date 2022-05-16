@@ -82,29 +82,29 @@ class TaskTemplate:
 
 ```python
     def __init__(self, csv_folder, launch_example=None):
-        """
-        :param launch_example: Can overwrite default <self.example> value.
-        """
-        self.win = visual.Window(
-            size=[1920, 1080],  # if needed, change the size in corcondance with your monitor
-            fullscr=False,
-            units="pix",
-            screen=0,
-            allowStencil=False,
-            monitor='testMonitor',
-            color=self.bg,
-            colorSpace='rgb'
-        )
-        exp_info = {'participant': '', "date": data.getDateStr()}
-        gui.DlgFromDict(exp_info, title='Subliminal Priming Task', fixed=["date"])
-        self.participant = exp_info["participant"]
-        file_name = exp_info['participant'] + '_' + exp_info['date']
-        self.dataFile = open(f"{csv_folder}/{file_name}.csv", 'w')
-        self.dataFile.write(", ".join(self.csv_headers))
-        self.dataFile.write("\n")
-        if launch_example is not None:
-            self.launch_example = launch_example
-        self.init()
+    """
+    :param launch_example: Can overwrite default <self.example> value.
+    """
+    self.win = visual.Window(
+        size=[1920, 1080],  # if needed, change the size in corcondance with your monitor
+        fullscr=False,
+        units="pix",
+        screen=0,
+        allowStencil=False,
+        monitor='testMonitor',
+        color=self.bg,
+        colorSpace='rgb'
+    )
+    exp_info = {'participant': '', "date": data.getDateStr()}
+    gui.DlgFromDict(exp_info, title='Subliminal Priming Task', fixed=["date"])
+    self.participant = exp_info["participant"]
+    file_name = exp_info['participant'] + '_' + exp_info['date']
+    self.dataFile = open(f"{csv_folder}/{file_name}.csv", 'w')
+    self.dataFile.write(", ".join(self.csv_headers))
+    self.dataFile.write("\n")
+    if launch_example is not None:
+        self.launch_example = launch_example
+    self.__init__()
 ```
 
 ```python
