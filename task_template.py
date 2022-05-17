@@ -314,7 +314,7 @@ class TaskTemplate:
             ori=ori,
             units=units,
             autoLog=autolog,
-            )
+        )
 
     def create_visual_rect(self, size, lineColor, fillColor, units="height", autolog=None):
         return visual.Rect(
@@ -537,7 +537,6 @@ class TaskTemplate:
 
         img = Image.new('RGBA', tuple(self.win.size))
         img_draw = ImageDraw.Draw(img)
-
         result_img = visual.SimpleImageStim(self.win, img, autoLog=False)
         result_msg = visual.TextStim(self.win, pos=(0, -self.win.size[1] / 4),
                                      color=text_color, units='pix', autoLog=False)
@@ -547,7 +546,6 @@ class TaskTemplate:
         if self.win.units == 'norm':  # fix oval
             remove_marker.setSize([float(self.win.size[1]) / self.win.size[0], 1.0])
             remove_marker.setSize([float(self.win.size[1]) / self.win.size[0], 1.0])
-
         self.calibration.enter_calibration_mode()
 
         self.move_duration = move_duration
@@ -582,6 +580,8 @@ class TaskTemplate:
             self.update_calibration()
 
             calibration_result = self.calibration.compute_and_apply()
+            print("Compute and apply returned {0} and collected at {1} points.".format(calibration_result.status,
+                                                                                       len(calibration_result.calibration_points)))
 
             self.win.flip()
 
@@ -914,7 +914,6 @@ class TaskTemplate:
 
         if self.recording:
             return
-
 
         if self.embed_events:
             self.datafile.write('\t'.join(['TimeStamp',
