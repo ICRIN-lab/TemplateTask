@@ -129,9 +129,13 @@ class TaskTemplate:
     "Time stamp since the RP has been plugged"
 
     ### EYE TRACKER VARIABLES
+    eye_tracker_study = True
+    "Yes if eye_tracker is plugged to the computer"
     eyetracker = None
+    "Set the eye-tracker machine"
     calibration = None
     gaze_data = []
+    "Gaze data which will be saved in the tsv file"
     event_data = []
     retry_points = []
     datafile = None
@@ -172,21 +176,21 @@ class TaskTemplate:
         self.dataFile.write("\n")
         if launch_example is not None:
             self.launch_example = launch_example
+        if self.eye_tracker_study:
+            self.calibration_target_dot_size = default_calibration_target_dot_size[self.win.units]
+            self.calibration_target_disc_size = default_calibration_target_disc_size[self.win.units]
+            self.calibration_target_dot = visual.Circle(self.win,
+                                                        radius=self.calibration_target_dot_size, fillColor='white',
+                                                        lineColor=None, lineWidth=1, autoLog=False)
+            self.calibration_target_disc = visual.Circle(self.win,
+                                                         radius=self.calibration_target_disc_size,
+                                                         fillColor='lime',
+                                                         lineColor='white', lineWidth=1, autoLog=False)
 
-        self.calibration_target_dot_size = default_calibration_target_dot_size[self.win.units]
-        self.calibration_target_disc_size = default_calibration_target_disc_size[self.win.units]
-        self.calibration_target_dot = visual.Circle(self.win,
-                                                    radius=self.calibration_target_dot_size, fillColor='white',
-                                                    lineColor=None, lineWidth=1, autoLog=False)
-        self.calibration_target_disc = visual.Circle(self.win,
-                                                     radius=self.calibration_target_disc_size,
-                                                     fillColor='lime',
-                                                     lineColor='white', lineWidth=1, autoLog=False)
-
-        self.update_calibration = self.update_calibration_default
-        if self.win.units == 'norm':  # fix oval
-            self.calibration_target_dot.setSize([float(self.win.size[1]) / self.win.size[0], 1.0])
-            self.calibration_target_disc.setSize([float(self.win.size[1]) / self.win.size[0], 1.0])
+            self.update_calibration = self.update_calibration_default
+            if self.win.units == 'norm':  # fix oval
+                self.calibration_target_dot.setSize([float(self.win.size[1]) / self.win.size[0], 1.0])
+                self.calibration_target_disc.setSize([float(self.win.size[1]) / self.win.size[0], 1.0])
 
         self.init()
 
@@ -248,13 +252,13 @@ class TaskTemplate:
                              self.flag_code, self.quit_code]
 
         ### EYE TRACKER
+        if self.eye_tracker_study:
+            eyetrackers = tobii_research.find_all_eyetrackers()
 
-        eyetrackers = tobii_research.find_all_eyetrackers()
-
-        if len(eyetrackers) == 0:
-            raise RuntimeError('No Tobii eyetrackers')
-        self.eyetracker = eyetrackers[0]
-        self.calibration = tobii_research.ScreenBasedCalibration(self.eyetracker)
+            if len(eyetrackers) == 0:
+                raise RuntimeError('No Tobii eyetrackers')
+            self.eyetracker = eyetrackers[0]
+            self.calibration = tobii_research.ScreenBasedCalibration(self.eyetracker)
 
     def update_csv(self, *args):
         args = list(map(str, args))
@@ -368,14 +372,15 @@ class TaskTemplate:
     def wait_yes(self, key):
         """wait until user presses <self.yes_key_code>
         """
-        while self.get_response(self.response_pad) != key:
+        while self.get_response() != key:
             pass
 
     def quit_experiment(self):
         """Ends the experiment
         """
-        self.unsubscribe()
-        self.close_datafile()
+        if self.eye_tracker_study:
+            self.unsubscribe()
+            self.close_datafile()
         self.dataFile.close()
         exit()
 
@@ -384,7 +389,6 @@ class TaskTemplate:
         Pressing Q while the function is wait for a response will quit the experiment.
         Returns the pressed key.
         """
-
         if keys is None:
             keys = self.keys
 
@@ -422,7 +426,7 @@ class TaskTemplate:
             return str(resp["key"]), resp["time"] / 1000
         else:
             clock = core.Clock()
-            resp = event.waitKeys(timeout, keys, timeStamped=clock)
+            resp = event.waitKeys(maxWait=timeout, keyList=keys, timeStamped=clock)
             if resp is None:
                 return resp
             if resp[0][0] == self.quit_code:
@@ -1136,40 +1140,39 @@ class TaskTemplate:
         """
 
     def start(self):
-        ## EYE TRACKER PART ###
-        self.open_datafile(f"csv_eyetracker/{self.file_name}.tsv", embed_events=False)
-        self.set_calibration_keymap({'num_7': 0, 'num_9': 1, 'num_5': 2, 'num_1': 3, 'num_3': 4})
-        self.show_status()
-        ret = self.run_calibration([(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0), (-0.4, -0.4), (0.4, -0.4)])
+        if self.eye_tracker_study:
+            self.open_datafile(f"csv_eyetracker/{self.file_name}.tsv", embed_events=False)
+            self.set_calibration_keymap({'num_7': 0, 'num_9': 1, 'num_5': 2, 'num_1': 3, 'num_3': 4})
+            self.show_status()
+            ret = self.run_calibration([(-0.4, 0.4), (0.4, 0.4), (0.0, 0.0), (-0.4, -0.4), (0.4, -0.4)])
 
-        if ret == "abort":
-            sys.exit()
-        marker = visual.Rect(self.win, size=(0.01, 0.01))
-        self.subscribe()
+            if ret == "abort":
+                sys.exit()
+            marker = visual.Rect(self.win, size=(0.01, 0.01))
+            self.subscribe()
 
-        waitkey = True
-        while waitkey:
-            # Get the latest gaze position data.
-            currentGazePosition = self.get_current_gaze_position()
+            waitkey = True
+            while waitkey:
+                # Get the latest gaze position data.
+                currentGazePosition = self.get_current_gaze_position()
 
-            # Gaze position is a tuple of four values (lx, ly, rx, ry).
-            # The value is numpy.nan if Tobii failed to detect gaze position.
-            if not np.nan in currentGazePosition:
-                marker.setPos(currentGazePosition[0:2])
-                marker.setLineColor('white')
-            else:
-                marker.setLineColor('red')
-            keys = event.getKeys()
-            if 'space' in keys:
-                waitkey = False
-            elif len(keys) >= 1:
-                # Record the first key name to the data file.
-                self.record_event(keys[0])
+                # Gaze position is a tuple of four values (lx, ly, rx, ry).
+                # The value is numpy.nan if Tobii failed to detect gaze position.
+                if not np.nan in currentGazePosition:
+                    marker.setPos(currentGazePosition[0:2])
+                    marker.setLineColor('white')
+                else:
+                    marker.setLineColor('red')
+                keys = event.getKeys()
+                if 'space' in keys:
+                    waitkey = False
+                elif len(keys) >= 1:
+                    # Record the first key name to the data file.
+                    self.record_event(keys[0])
 
-            marker.draw()
-            self.win.flip()
+                marker.draw()
+                self.win.flip()
 
-        ## EYE TRACKER END ###
         self.win.winHandle.set_fullscreen(True)
         self.win.flip()
         self.win.mouseVisible = False
@@ -1197,6 +1200,7 @@ class TaskTemplate:
         self.win.flip()
         core.wait(60)
         self.dataFile.close()
-        self.unsubscribe()
-        self.close_datafile()
+        if self.eye_tracker_study:
+            self.unsubscribe()
+            self.close_datafile()
         self.quit_experiment()
