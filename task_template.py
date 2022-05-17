@@ -445,7 +445,9 @@ class TaskTemplate:
         :param bool enable_mouse: If True, mouse operation is enabled.
             Default value is False.
         """
-
+        self.win.winHandle.set_fullscreen(True)
+        self.win.flip()
+        self.win.mouseVisible = False
         if self.eyetracker is None:
             raise RuntimeError('Eyetracker is not found.')
 
@@ -583,7 +585,7 @@ class TaskTemplate:
 
             self.win.flip()
 
-            # img_draw.rectangle(((0, 0), tuple(self.win.size)), fill=(0, 0, 0, 0))
+            img_draw.rectangle(((0, 0), tuple(self.win.size)), fill=(0, 0, 0, 0))
             # CHECK IF NEEDED !!!!!
             if calibration_result.status == tobii_research.CALIBRATION_STATUS_FAILURE:
                 # computeCalibration failed.
@@ -631,23 +633,7 @@ class TaskTemplate:
                                 self.retry_points.remove(key_index)
                             else:
                                 self.retry_points.append(key_index)
-                if enable_mouse:
-                    pressed = mouse.getPressed()
-                    if pressed[2]:  # right click
-                        key = decision_key
-                        waitkey = False
-                    elif pressed[0]:  # left click
-                        mouse_pos = mouse.getPos()
-                        for key_index in range(len(self.original_calibration_points)):
-                            p = self.original_calibration_points[key_index]
-                            if np.linalg.norm([mouse_pos[0] - p[0],
-                                               mouse_pos[1] - p[1]]) < self.calibration_target_dot.radius * 5:
-                                if key_index in self.retry_points:
-                                    self.retry_points.remove(key_index)
-                                else:
-                                    self.retry_points.append(key_index)
-                                time.sleep(0.2)
-                                break
+
                 result_img.draw()
                 if len(self.retry_points) > 0:
                     for index in self.retry_points:
@@ -672,13 +658,7 @@ class TaskTemplate:
             else:
                 raise RuntimeError('Calibration: Invalid key')
 
-            if enable_mouse:
-                mouse.setVisible(False)
-
         self.calibration.leave_calibration_mode()
-
-        if enable_mouse:
-            mouse.setVisible(False)
 
         return retval
 
