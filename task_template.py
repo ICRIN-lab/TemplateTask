@@ -1178,7 +1178,8 @@ class TaskTemplate:
         flag.draw()
         self.win.flip()
         self.wait_yes(self.flag_code)
-        self.subscribe()
+        if self.eye_tracker_study:
+            self.subscribe()
         self.win.flip()
         core.wait(2)
         for i in range(self.trials):
