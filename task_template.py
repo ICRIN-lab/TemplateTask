@@ -285,7 +285,7 @@ class TaskTemplate:
             if answer == key:
                 return value
 
-    def create_visual_text(self, text, pos=(0, 0), font_size=0.06, color="white", units='height', autolog=None):
+    def create_visual_text(self, text, pos=(0, 0), font_size=0.06, color=text_color, units='height', autolog=None):
         """
         Create a <visual.TextStim> with some default parameters so it's simpler to create visual texts
         """
@@ -382,7 +382,7 @@ class TaskTemplate:
             self.unsubscribe()
             self.close_datafile()
         self.dataFile.close()
-        exit()
+        sys.exit()
 
     def get_response(self, keys=None, timeout=float("inf")):
         """Waits for a response from the participant.
@@ -428,7 +428,7 @@ class TaskTemplate:
             clock = core.Clock()
             resp = event.waitKeys(maxWait=timeout, keyList=keys, timeStamped=clock)
             if resp is None:
-                return resp
+                return [None, None]
             if resp[0][0] == self.quit_code:
                 self.quit_experiment()
             return resp[0]
@@ -839,11 +839,11 @@ class TaskTemplate:
         """
 
         if len(self.gaze_data) == 0:
-            return (np.nan, np.nan, np.nan, np.nan)
+            return np.nan, np.nan, np.nan, np.nan
         else:
             lxy = self.get_psychopy_pos(self.gaze_data[-1][1:3])
             rxy = self.get_psychopy_pos(self.gaze_data[-1][5:7])
-            return (lxy[0], lxy[1], rxy[0], rxy[1])
+            return lxy[0], lxy[1], rxy[0], rxy[1]
 
     def get_current_pupil_size(self):
         """
@@ -853,7 +853,7 @@ class TaskTemplate:
         """
 
         if len(self.gaze_data) == 0:
-            return (None, None)
+            return None, None
         else:
             return (self.gaze_data[-1][3],  # lp
                     self.gaze_data[-1][7])  # rp
@@ -1155,19 +1155,19 @@ class TaskTemplate:
         self.win.winHandle.set_fullscreen(True)
         self.win.flip()
         self.win.mouseVisible = False
-        self.create_visual_text(self.welcome).draw()
+        self.create_visual_text(self.welcome, color=self.text_color).draw()
         self.win.flip()
         core.wait(2)
-        next = self.create_visual_text(self.next, (0, -0.4), 0.04)
-        flag = self.create_visual_text(self.flag, (0, 0.4), 0.04)
+        next = self.create_visual_text(self.next, (0, -0.4), 0.04, color=self.text_color)
+        flag = self.create_visual_text(self.flag, (0, 0.4), 0.04, color=self.text_color)
         for instr in self.instructions:
-            self.create_visual_text(instr, font_size=self.font_size_instr).draw()
+            self.create_visual_text(instr, font_size=self.font_size_instr, color=self.text_color).draw()
             next.draw()
             self.win.flip()
             self.wait_yes(self.yes_key_code)
         if self.launch_example:
             self.example()
-        self.create_visual_text(self.good_luck).draw()
+        self.create_visual_text(self.good_luck, color=self.text_color).draw()
         flag.draw()
         self.win.flip()
         self.wait_yes(self.flag_code)
@@ -1175,7 +1175,7 @@ class TaskTemplate:
         core.wait(2)
         for i in range(self.trials):
             self.task(i)
-        self.create_visual_text(self.end).draw()
+        self.create_visual_text(self.end, color=self.text_color).draw()
         self.win.flip()
         core.wait(60)
         self.dataFile.close()
