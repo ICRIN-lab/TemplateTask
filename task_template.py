@@ -147,6 +147,7 @@ class TaskTemplate:
         """
         :param launch_example: Can overwrite default <self.example> value.
         """
+        self.shift = None
         self.right_key_code = None
         self.right_key_name = None
         self.mid_right_key_code = None
@@ -174,6 +175,7 @@ class TaskTemplate:
         self.dataFile = open(f"{csv_folder}/{self.file_name}.csv", 'w')
         self.dataFile.write(",".join(self.csv_headers))
         self.dataFile.write("\n")
+        self.time_stamp_shift = time.time()
         if launch_example is not None:
             self.launch_example = launch_example
         if self.eye_tracker_study:
@@ -799,6 +801,8 @@ class TaskTemplate:
         self.gaze_data = []
         self.event_data = []
         self.recording = True
+        # Temps entre "OK" dans la boîte de dialogue ET quand le mec appuie sur la touche violette
+        self.shift = time.time() - self.time_stamp_shift
         self.eyetracker.subscribe_to(tobii_research.EYETRACKER_GAZE_DATA, self.on_gaze_data)
 
     def unsubscribe(self):
@@ -986,6 +990,7 @@ class TaskTemplate:
             self.datafile.write('TimeStamp\tEvent\n')
             for e in self.event_data:
                 self.datafile.write('%.1f\t%s\n' % ((e[0] - timestamp_start) / 1000.0, e[1]))
+            self.datafile.write('Shift\t'+str(self.shift))
 
         self.datafile.flush()
 
@@ -1128,6 +1133,7 @@ class TaskTemplate:
             if ret == "abort":
                 sys.exit()
             marker = visual.Rect(self.win, size=(0.01, 0.01))
+            # recording starts just after calibration, when we can see the marker (rectangle) representing gaze
             self.subscribe()
 
             waitkey = True
@@ -1151,6 +1157,7 @@ class TaskTemplate:
 
                 marker.draw()
                 self.win.flip()
+            self.unsubscribe()
 
         self.win.winHandle.set_fullscreen(True)
         self.win.flip()
@@ -1171,6 +1178,8 @@ class TaskTemplate:
         flag.draw()
         self.win.flip()
         self.wait_yes(self.flag_code)
+        if self.eye_tracker_study:
+            self.subscribe()
         self.win.flip()
         core.wait(2)
         for i in range(self.trials):
